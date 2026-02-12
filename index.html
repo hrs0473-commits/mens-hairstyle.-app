@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="google" content="notranslate">
     <title>MEN'S CUT GUIDE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Helvetica Neue', Arial, sans-serif; overflow-x: hidden; }
+        body { background-color: #0f172a; color: white; font-family: sans-serif; overflow-x: hidden; }
         .pro-mode { background-color: white; color: black; display: none; min-height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; z-index: 50; }
         .btn-active { background-color: #22d3ee !important; color: #0f172a !important; font-weight: bold; }
     </style>
@@ -15,7 +16,7 @@
     <div id="main-ui" class="w-full max-w-md p-6">
         <header class="text-center mb-8">
             <h1 class="text-3xl font-black text-cyan-400 tracking-tighter">MEN'S CUT GUIDE</h1>
-            <p class="text-xs text-slate-400 mt-1">10秒で、理想のスタイルへ</p>
+            <p class="text-xs text-slate-400 mt-1">AI 連携モード始動</p>
         </header>
 
         <div id="upload-box" class="w-full aspect-[3/4] border-2 border-dashed border-slate-700 rounded-3xl flex flex-col justify-center items-center bg-slate-800/50 overflow-hidden relative shadow-2xl" onclick="document.getElementById('fileInput').click()">
@@ -23,24 +24,21 @@
                 <div class="bg-slate-700 p-4 rounded-full mb-3 inline-block">
                     <span class="text-4xl">📷</span>
                 </div>
-                <p class="text-sm font-bold">タップして自撮りを撮影・選択</p>
-                <p class="text-xs text-slate-500 mt-1">正面からの写真がおすすめ</p>
+                <p class="text-sm font-bold">写真を撮影・選択</p>
             </div>
             <img id="preview" class="hidden w-full h-full object-cover">
             <input id="fileInput" type="file" hidden accept="image/*" capture="user" onchange="previewImage(event)">
         </div>
 
         <div class="mt-8">
-            <p class="text-sm font-bold mb-4 text-slate-400 ml-1">スタイルを選択</p>
+            <p class="text-sm font-bold mb-4 text-slate-400 ml-1">スタイルを選択してAI送信</p>
             <div class="grid grid-cols-2 gap-3">
-                <button id="btn-1" onclick="selectStyle(1, 'トレンドマッシュ', 'サイドは6mmでツーブロック。襟足は刈り上げず、スッキリ短めに残してください。前髪は目にかかる長さで重めに。')" class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-sm font-bold transition-all active:scale-95">トレンドマッシュ</button>
-                <button id="btn-2" onclick="selectStyle(2, 'センターパート', '毛流れが出るようにスライドカット。前髪は目の下の長さで設定し、後ろに流れるように。サイドはツーブロック。')" class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-sm font-bold transition-all active:scale-95">センターパート</button>
-                <button id="btn-3" onclick="selectStyle(3, 'フェードカット', '裾は0mmからのスキンフェード。トップは長さを残して、クロップスタイル風に寝かせてカットしてください。')" class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-sm font-bold transition-all active:scale-95">フェードカット</button>
-                <button id="btn-4" onclick="selectStyle(4, 'ウルフカット', '襟足を長めに残したネオウルフ。トップにレイヤーを入れて動きを出しやすく。サイドはタイトに。')" class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-sm font-bold transition-all active:scale-95">ネオウルフ</button>
+                <button id="btn-1" onclick="selectStyle(1, 'トレンドマッシュ', 'サイドは6mm。襟足スッキリ。前髪は重めに。')" class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-sm font-bold active:scale-95 transition-all">トレンドマッシュ</button>
+                <button id="btn-2" onclick="selectStyle(2, 'センターパート', '前髪は目の下。後ろに流れるスライドカット。')" class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-sm font-bold active:scale-95 transition-all">センターパート</button>
             </div>
         </div>
 
-        <button id="pro-btn" onclick="toggleProMode()" class="hidden w-full mt-8 bg-cyan-500 text-slate-900 p-5 rounded-2xl font-black shadow-lg shadow-cyan-500/20 active:scale-95 transition-all">
+        <button id="pro-btn" class="hidden w-full mt-8 bg-cyan-500 text-slate-900 p-5 rounded-2xl font-black shadow-lg shadow-cyan-500/20 active:scale-95 transition-all">
             美容師に見せる専用画面へ ➔
         </button>
     </div>
@@ -48,37 +46,27 @@
     <div id="pro-ui" class="pro-mode p-6">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-black tracking-tighter">TECHNICAL ORDER SHEET</h2>
-            <button onclick="toggleProMode()" class="text-2xl p-2">✕</button>
+            <button onclick="location.reload()" class="text-2xl p-2">✕</button>
         </div>
-        
         <div class="flex gap-5 mb-8 bg-slate-100 p-4 rounded-2xl">
-            <img id="pro-preview" class="w-32 h-40 object-cover rounded-xl shadow-lg">
+            <img id="pro-preview" class="w-32 h-40 object-cover rounded-xl shadow-lg bg-white">
             <div class="flex flex-col justify-center">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Desired Style</p>
                 <p id="selected-style-name" class="text-2xl font-black"></p>
-                <div class="mt-2 bg-black text-white text-[10px] px-2 py-1 rounded inline-block w-fit">SIMULATION DONE</div>
+                <div class="mt-2 bg-black text-white text-[10px] px-2 py-1 rounded inline-block w-fit">AI CONNECTED</div>
             </div>
         </div>
-
         <div class="space-y-6">
             <section>
-                <h3 class="text-xs font-bold text-slate-400 mb-2 border-b border-slate-200 pb-1 uppercase">Cutting Instructions</h3>
+                <h3 class="text-xs font-bold text-slate-400 mb-2 border-b border-slate-200 pb-1 uppercase">Instructions</h3>
                 <p id="order-text" class="text-md leading-relaxed font-medium text-slate-800"></p>
             </section>
-            
-            <section class="bg-amber-50 p-4 rounded-xl border border-amber-100">
-                <h3 class="text-xs font-bold text-amber-600 mb-1">美容師様へ</h3>
-                <p class="text-[13px] text-amber-800 leading-snug">この指示書はAIによるシミュレーション結果に基づいています。お客様の骨格や髪質に合わせて調整をお願いいたします。</p>
-            </section>
         </div>
-
-        <p class="fixed bottom-8 left-0 w-full text-center text-[10px] text-slate-400 font-medium">
-            GENERATED BY MEN'S CUT GUIDE
-        </p>
     </div>
 
     <script>
-        let selectedId = null;
+        // あなたの専用URLをセット済みです
+        const MAKE_URL = "https://hook.us2.make.com/dhkfhhpxm5s5bhpdfouqlanyzrdyow5a";
 
         function previewImage(event) {
             const file = event.target.files[0];
@@ -93,35 +81,43 @@
             }
         }
 
-        function selectStyle(id, name, order) {
-            // 前の選択を解除
-            if (selectedId) {
-                document.getElementById('btn-' + selectedId).classList.remove('btn-active');
+        async function selectStyle(id, name, order) {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) {
+                alert("先に自撮り写真を撮影してください！");
+                return;
             }
-            // 新しい選択を適用
-            selectedId = id;
-            document.getElementById('btn-' + id).classList.add('btn-active');
-            
-            document.getElementById('selected-style-name').innerText = name;
-            document.getElementById('order-text').innerText = order;
-            document.getElementById('pro-btn').classList.remove('hidden');
-            
-            // 軽くバイブレーション（スマホのみ）
-            if (window.navigator.vibrate) window.navigator.vibrate(50);
-        }
 
-        function toggleProMode() {
-            const main = document.getElementById('main-ui');
-            const pro = document.getElementById('pro-ui');
-            if (pro.style.display === 'block') {
-                pro.style.display = 'none';
-                main.style.display = 'block';
-                document.body.style.backgroundColor = '#0f172a';
-            } else {
-                pro.style.display = 'block';
-                main.style.display = 'none';
-                document.body.style.backgroundColor = '#ffffff';
-                window.scrollTo(0,0);
+            const proBtn = document.getElementById('pro-btn');
+            proBtn.classList.remove('hidden');
+            proBtn.disabled = true;
+            proBtn.innerHTML = '<span class="animate-spin inline-block mr-2">🌀</span> AIに送信中...';
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('style', name);
+
+            try {
+                // Make.comへデータを飛ばす
+                await fetch(MAKE_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // 通信成功時の表示
+                proBtn.disabled = false;
+                proBtn.innerHTML = '送信成功！画面を見る ➔';
+                proBtn.onclick = () => {
+                    document.getElementById('main-ui').style.display = 'none';
+                    document.getElementById('pro-ui').style.display = 'block';
+                    document.getElementById('selected-style-name').innerText = name;
+                    document.getElementById('order-text').innerText = order;
+                };
+
+            } catch (error) {
+                console.error("エラー:", error);
+                proBtn.innerHTML = '送信エラー。通信環境を確認してください';
+                proBtn.disabled = false;
             }
         }
     </script>
