@@ -19,80 +19,56 @@
 <body>
     <div class="container">
         <h1>メンズヘアスタイルAI</h1>
-        <p>自撮り写真を送って新しい髪型を試そう</p>
-        
+        <p>自撮り写真を撮るか選んで送信してください</p>
         <div class="btn-group">
             <input type="file" id="photoInput" accept="image/*">
-            
             <button class="btn-capture" id="startBtn" onclick="startCamera()">カメラを起動する</button>
             <video id="video" autoplay playsinline></video>
             <button id="snap" style="display:none;" onclick="takeSnapshot()">写真を撮る</button>
             <canvas id="canvas"></canvas>
-
             <button onclick="uploadPhoto()">AIで髪型を生成する</button>
         </div>
-
         <div id="result"></div>
     </div>
-
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const snap = document.getElementById('snap');
         const resultDiv = document.getElementById('result');
-        // 今回のWebhook URLのみを反映
         const webhookUrl = 'https://hook.us2.make.com/bhajhkquktnfjb2cqbgi1d911e272e52';
 
         async function startCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                video.srcObject = stream;
-                video.style.display = 'block';
-                snap.style.display = 'block';
+                video.srcObject = stream; video.style.display = 'block'; snap.style.display = 'block';
                 document.getElementById('startBtn').style.display = 'none';
-            } catch (err) {
-                alert("カメラを起動できませんでした");
-            }
+            } catch (err) { alert("カメラを起動できませんでした"); }
         }
 
         let capturedBlob = null;
         function takeSnapshot() {
             const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0);
             canvas.toBlob((blob) => {
-                capturedBlob = blob;
-                video.style.display = 'none';
-                snap.style.display = 'none';
-                resultDiv.innerHTML = '<p>撮影完了！生成ボタンを押してください</p>';
+                capturedBlob = blob; video.style.display = 'none'; snap.style.display = 'none';
+                resultDiv.innerHTML = '<p>撮影完了！</p>';
             }, 'image/jpeg');
         }
 
         async function uploadPhoto() {
             const fileInput = document.getElementById('photoInput');
             let file = capturedBlob || fileInput.files[0];
-
-            if (!file) {
-                alert('写真を用意してください');
-                return;
-            }
-
-            resultDiv.innerHTML = '生成中...';
-            const formData = new FormData();
-            formData.append('file', file, 'photo.jpg');
-
+            if (!file) { alert('写真を用意してください'); return; }
+            resultDiv.innerHTML = 'AI生成中...';
+            const formData = new FormData(); formData.append('file', file, 'photo.jpg');
             try {
                 const response = await fetch(webhookUrl, { method: 'POST', body: formData });
                 if (response.ok) {
                     const blob = await response.blob();
                     resultDiv.innerHTML = `<h3>完成！</h3><img src="${URL.createObjectURL(blob)}">`;
-                } else {
-                    resultDiv.innerHTML = 'エラー：Makeを確認してください';
-                }
-            } catch (e) {
-                resultDiv.innerHTML = '通信エラー';
-            }
+                } else { resultDiv.innerHTML = 'エラー：Makeの設定を確認してください'; }
+            } catch (e) { resultDiv.innerHTML = '通信エラー'; }
         }
     </script>
 </body>
