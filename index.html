@@ -1,75 +1,183 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>メンズヘアスタイルAI診断</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f0f0; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        input { margin: 20px 0; }
-        .btn-group { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        button { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 80%; }
-        .btn-capture { background: #28a745; }
-        #result { margin-top: 20px; }
-        img { max-width: 100%; border-radius: 10px; margin-top: 10px; border: 2px solid #ddd; }
-        video, canvas { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 10px; display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>メンズヘアスタイルAI診断</title>
+
+<style>
+body {
+    font-family: sans-serif;
+    text-align: center;
+    padding: 20px;
+    background: #f0f0f0;
+}
+
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: auto;
+}
+
+input { margin: 20px 0; }
+
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 80%;
+}
+
+.btn-capture { background: #28a745; }
+
+#result { margin-top: 20px; }
+
+img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-top: 10px;
+    border: 2px solid #ddd;
+}
+
+video, canvas {
+    width: 100%;
+    max-width: 400px;
+    margin: 10px auto;
+    border-radius: 10px;
+    display: none;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>メンズヘアスタイルAI</h1>
-        <p>自撮り写真を撮るか選んで送信してください</p>
-        <div class="btn-group">
-            <input type="file" id="photoInput" accept="image/*">
-            <button class="btn-capture" id="startBtn" onclick="startCamera()">カメラを起動する</button>
-            <video id="video" autoplay playsinline></video>
-            <button id="snap" style="display:none;" onclick="takeSnapshot()">写真を撮る</button>
-            <canvas id="canvas"></canvas>
-            <button onclick="uploadPhoto()">AIで髪型を生成する</button>
-        </div>
-        <div id="result"></div>
-    </div>
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const snap = document.getElementById('snap');
-        const resultDiv = document.getElementById('result');
-        const webhookUrl = 'https://hook.us2.make.com/s21q1o3ebsx9muqwjgih5cpqewxtikyi';
 
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                video.srcObject = stream; video.style.display = 'block'; snap.style.display = 'block';
-                document.getElementById('startBtn').style.display = 'none';
-            } catch (err) { alert("カメラを起動できませんでした"); }
+<div class="container">
+<h1>メンズヘアスタイルAI</h1>
+<p>自撮り写真を撮るか選んで送信してください</p>
+
+<div class="btn-group">
+<input type="file" id="photoInput" accept="image/*">
+<button class="btn-capture" id="startBtn" onclick="startCamera()">カメラを起動する</button>
+<video id="video" autoplay playsinline></video>
+<button id="snap" style="display:none;" onclick="takeSnapshot()">写真を撮る</button>
+<canvas id="canvas"></canvas>
+<button onclick="uploadPhoto()">AIで髪型を生成する</button>
+</div>
+
+<div id="result"></div>
+</div>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const snap = document.getElementById('snap');
+const resultDiv = document.getElementById('result');
+
+/* あなたのWebhook */
+const webhookUrl = 'https://hook.us2.make.com/s21q1o3ebsx9muqwjgih5cpqewxtikyi';
+
+
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" }
+        });
+
+        video.srcObject = stream;
+        video.style.display = 'block';
+        snap.style.display = 'block';
+        document.getElementById('startBtn').style.display = 'none';
+
+    } catch (err) {
+        alert("カメラを起動できませんでした");
+    }
+}
+
+let capturedBlob = null;
+
+function takeSnapshot() {
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+
+    canvas.toBlob((blob) => {
+        capturedBlob = blob;
+        video.style.display = 'none';
+        snap.style.display = 'none';
+        resultDiv.innerHTML = '<p>撮影完了！</p>';
+    }, 'image/jpeg');
+}
+
+
+async function uploadPhoto() {
+
+    const fileInput = document.getElementById('photoInput');
+    let file = capturedBlob || fileInput.files[0];
+
+    if (!file) {
+        alert('写真を用意してください');
+        return;
+    }
+
+    resultDiv.innerHTML = 'AI生成中...';
+
+    const formData = new FormData();
+    formData.append('file', file, 'photo.jpg');
+
+    try {
+
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            resultDiv.innerHTML = 'エラー：Makeの設定を確認してください';
+            return;
         }
 
-        let capturedBlob = null;
-        function takeSnapshot() {
-            const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0);
-            canvas.toBlob((blob) => {
-                capturedBlob = blob; video.style.display = 'none'; snap.style.display = 'none';
-                resultDiv.innerHTML = '<p>撮影完了！</p>';
-            }, 'image/jpeg');
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+
+            const data = await response.json();
+
+            resultDiv.innerHTML = `
+                <h3>完成！</h3>
+                ${data.image ? `<img src="${data.image}">` : ''}
+                ${data.description ? `<h4>AI提案</h4><p>${data.description}</p>` : ''}
+                ${data.order ? `<h4>美容師向けオーダー</h4><p>${data.order}</p>` : ''}
+            `;
+
+        } else {
+
+            const blob = await response.blob();
+            resultDiv.innerHTML = `
+                <h3>完成！</h3>
+                <img src="${URL.createObjectURL(blob)}">
+            `;
         }
 
-        async function uploadPhoto() {
-            const fileInput = document.getElementById('photoInput');
-            let file = capturedBlob || fileInput.files[0];
-            if (!file) { alert('写真を用意してください'); return; }
-            resultDiv.innerHTML = 'AI生成中...';
-            const formData = new FormData(); formData.append('file', file, 'photo.jpg');
-            try {
-                const response = await fetch(webhookUrl, { method: 'POST', body: formData });
-                if (response.ok) {
-                    const blob = await response.blob();
-                    resultDiv.innerHTML = `<h3>完成！</h3><img src="${URL.createObjectURL(blob)}">`;
-                } else { resultDiv.innerHTML = 'エラー：Makeの設定を確認してください'; }
-            } catch (e) { resultDiv.innerHTML = '通信エラー'; }
-        }
-    </script>
+    } catch (e) {
+        resultDiv.innerHTML = '通信エラー';
+    }
+}
+</script>
+
 </body>
 </html>
