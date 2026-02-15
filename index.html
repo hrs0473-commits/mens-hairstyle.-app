@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>投稿</title>
+<title>スポット投稿 - AI連携</title>
 
 <style>
 body{
@@ -15,6 +15,8 @@ body{
 
 .container{
   padding:20px;
+  max-width: 500px;
+  margin: auto;
 }
 
 input, textarea{
@@ -26,6 +28,7 @@ input, textarea{
   background:#1a212b;
   color:white;
   font-size:16px;
+  box-sizing: border-box;
 }
 
 button{
@@ -38,6 +41,11 @@ button{
   color:black;
   font-size:18px;
   font-weight:bold;
+  cursor: pointer;
+}
+
+button:active {
+  background:#0086ba;
 }
 
 .preview{
@@ -45,6 +53,12 @@ button{
   width:100%;
   border-radius:14px;
   display:none;
+}
+
+#status {
+  margin-top: 15px;
+  text-align: center;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -55,23 +69,24 @@ button{
 
 <h2>スポット投稿</h2>
 
-<input id="spot" placeholder="スポット名">
-<textarea id="comment" placeholder="コメント"></textarea>
+<input id="spot" placeholder="スポット名（例：大阪城）">
+<textarea id="comment" placeholder="AIへの指示（例：この場所をサイバーパンク風にして）"></textarea>
 
 <input type="file" id="image" accept="image/*">
 <img id="preview" class="preview">
 
-<button onclick="send()">送信</button>
+<button id="sendBtn" onclick="send()">AIに送信する</button>
+<div id="status"></div>
 
 </div>
 
 <script>
 
-/* ===== Webhook URL ===== */
-const webhookUrl = 'https://hook.us2.make.com/s21q1o3ebsx9muqwjgih5cpqewxtikyi';
+/* ===== Webhook URL (最新版に更新済み) ===== */
+const webhookUrl = 'https://hook.us2.make.com/4g4yruw1xpyj4846m1b6mvyq750fksij';
 
 
-/* 画像プレビュー */
+/* 画像プレビュー表示 */
 document.getElementById("image").onchange = e=>{
   const file = e.target.files[0];
   if(!file) return;
@@ -85,41 +100,63 @@ document.getElementById("image").onchange = e=>{
 };
 
 
-/* 送信 */
+/* 送信処理 */
 async function send(){
-
   const spot=document.getElementById("spot").value;
   const comment=document.getElementById("comment").value;
   const file=document.getElementById("image").files[0];
+  const btn = document.getElementById("sendBtn");
+  const status = document.getElementById("status");
 
   if(!spot){
-    alert("スポット名を入力");
+    alert("スポット名を入力してください");
     return;
   }
 
-  let base64="";
+  // 送信中表示
+  btn.disabled = true;
+  btn.innerText = "送信中...";
+  status.innerText = "Makeにデータを送っています...";
 
+  let base64="";
   if(file){
     base64=await toBase64(file);
   }
 
-  await fetch(webhookUrl,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      spot:spot,
-      comment:comment,
-      image:base64
-    })
-  });
+  try {
+    const response = await fetch(webhookUrl,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        spot:spot,
+        comment:comment,
+        image:base64,
+        timestamp: new Date().toISOString()
+      })
+    });
 
-  alert("送信しました！");
+    if(response.ok) {
+      status.style.color = "#00ff88";
+      status.innerText = "送信成功！Makeの画面を確認してください。";
+      alert("送信完了！Make側で丸が回っているか確認してください。");
+    } else {
+      throw new Error("送信失敗");
+    }
+
+  } catch (error) {
+    status.style.color = "#ff4444";
+    status.innerText = "エラー: Makeが『Run once』待機中か確認してください。";
+    console.error(error);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "AIに送信する";
+  }
 }
 
 
-/* Base64変換 */
+/* Base64変換関数 */
 function toBase64(file){
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
