@@ -35,7 +35,7 @@
         const canvas = document.getElementById('canvas');
         const snap = document.getElementById('snap');
         const resultDiv = document.getElementById('result');
-        const webhookUrl = 'https://hook.us2.make.com/bhajhkquktnfjb2cqbgi1d911e272e52';
+        const webhookUrl = 'https://hook.us2.make.com/4g4yruw1xpyj4846m1b6mvyq750fksij';
 
         async function startCamera() {
             try {
@@ -59,7 +59,7 @@
         async function uploadPhoto() {
             const fileInput = document.getElementById('photoInput');
             let file = capturedBlob || fileInput.files[0];
-            if (!file) { alert('写真を用意してください'); return; }
+            ~if (!file) { alert('写真を用意してください'); return; }
             resultDiv.innerHTML = 'AI生成中...';
             const formData = new FormData(); formData.append('file', file, 'photo.jpg');
             try {
